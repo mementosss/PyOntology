@@ -1,4 +1,3 @@
-# Классы для разных типов героев
 class Hero:
     def __init__(self, name, health, mana, gender, role):
         self.name = name
@@ -82,14 +81,12 @@ phantom_assassin.add_synergy(crystal_maiden, warlock)
 crystal_maiden.add_synergy(phantom_assassin, axe)
 warlock.add_synergy(phantom_assassin)
 
-# Вывод данных
 print("\nRoles:", carry, offlaner, support)
 print("Heroes:", axe, phantom_assassin, crystal_maiden, warlock)
 print("Items:", belt_of_strength, blade_of_alacrity, mantle_of_intelligence, ogre_axe, parasma, slippers_of_agility, staff_of_wizardry)
 
 print("\nHero Details:")
 for hero in [axe, phantom_assassin, crystal_maiden, warlock]:
-    # Выводим информацию о подклассе
     print(f"{hero.name} -> Subclass: [{hero.__class__.__name__}]")
     print(f"  Health={hero.health}, Mana={hero.mana}, Gender={hero.gender}, Role={hero.role.name}")
     print(f"  Items: {[item for item in hero.items]}")
