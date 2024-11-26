@@ -15,7 +15,7 @@ class Hero:
         self.synergies.extend(heroes)
 
     def __repr__(self):
-        return f"Hero(name={self.name}, role={self.role})"
+        return f"Hero(name={self.name}, role={self.role.name})"
 
 
 class HeroStrength(Hero):
@@ -66,18 +66,149 @@ class Item:
         return f"Item(name={self.name})"
 
 
-# Пример ролей
+# Запросы
+class QuerySystem:
+    def __init__(self, heroes, roles, items):
+        self.heroes = heroes
+        self.roles = roles
+        self.items = items
+
+    def heroes_by_role(self, role_name):
+        """Поиск героев по роли"""
+        return [hero for hero in self.heroes if hero.role.name.lower() == role_name.lower()]
+
+    def heroes_by_item(self, item_name):
+        """Поиск героев по предмету"""
+        return [hero for hero in self.heroes if any(item.name.lower() == item_name.lower() for item in hero.items)]
+
+    def heroes_by_synergy(self, synergy_name):
+        """Поиск героев по синергии"""
+        return [hero for hero in self.heroes if any(synergy.name.lower() == synergy_name.lower() for synergy in hero.synergies)]
+
+    def items_by_role(self, role_name):
+        """Поиск предметов по роли"""
+        return [item for item in self.items if any(role.name.lower() == role_name.lower() for role in item.recommended_roles)]
+
+    def roles_by_item(self, item_name):
+        """Поиск ролей по предмету"""
+        return [role for role in self.roles if any(item.name.lower() == item_name.lower() for item in role.required_items + role.recommended_items)]
+
+
+# Запросы с выбором доступных опций
+class UserInterface:
+    def __init__(self, query_system):
+        self.query_system = query_system
+
+    def list_available_heroes(self):
+        return [hero.name for hero in self.query_system.heroes]
+
+    def list_available_roles(self):
+        return [role.name for role in self.query_system.roles]
+
+    def list_available_items(self):
+        return [item.name for item in self.query_system.items]
+
+    def heroes_by_role(self, role_name):
+        return self.query_system.heroes_by_role(role_name)
+
+    def heroes_by_item(self, item_name):
+        return self.query_system.heroes_by_item(item_name)
+
+    def heroes_by_synergy(self, synergy_name):
+        return self.query_system.heroes_by_synergy(synergy_name)
+
+    def items_by_role(self, role_name):
+        return self.query_system.items_by_role(role_name)
+
+    def roles_by_item(self, item_name):
+        return self.query_system.roles_by_item(item_name)
+
+    def user_interface(self):
+        print("Добро пожаловать в систему запросов!\n")
+        while True:
+            print("\nЧто вы хотите найти?")
+            print("1. Герои по роли")
+            print("2. Герои по предмету")
+            print("3. Герои по синергии")
+            print("4. Предметы по роли")
+            print("5. Роли по предмету")
+            print("6. Выход")
+
+            choice = input("Введите номер вашего выбора: ")
+
+            if choice == "1":
+                print("\nДоступные роли: ", ", ".join(self.list_available_roles()))
+                role_name = input("Введите роль: ")
+                heroes = self.heroes_by_role(role_name)
+                if heroes:
+                    print(f"\nГерои с ролью '{role_name}':")
+                    for hero in heroes:
+                        print(hero.name)
+                else:
+                    print("Герои с такой ролью не найдены.")
+
+            elif choice == "2":
+                print("\nДоступные предметы: ", ", ".join(self.list_available_items()))
+                item_name = input("Введите название предмета: ")
+                heroes = self.heroes_by_item(item_name)
+                if heroes:
+                    print(f"\nГерои с предметом '{item_name}':")
+                    for hero in heroes:
+                        print(hero.name)
+                else:
+                    print("Герои с таким предметом не найдены.")
+
+            elif choice == "3":
+                print("\nДоступные герои: ", ", ".join(self.list_available_heroes()))
+                synergy_name = input("Введите имя синергии: ")
+                heroes = self.heroes_by_synergy(synergy_name)
+                if heroes:
+                    print(f"\nГерои с синергией '{synergy_name}':")
+                    for hero in heroes:
+                        print(hero.name)
+                else:
+                    print("Герои с такой синергией не найдены.")
+
+            elif choice == "4":
+                print("\nДоступные роли: ", ", ".join(self.list_available_roles()))
+                role_name = input("Введите роль: ")
+                items = self.items_by_role(role_name)
+                if items:
+                    print(f"\nПредметы для роли '{role_name}':")
+                    for item in items:
+                        print(item.name)
+                else:
+                    print("Предметы для этой роли не найдены.")
+
+            elif choice == "5":
+                print("\nДоступные предметы: ", ", ".join(self.list_available_items()))
+                item_name = input("Введите название предмета: ")
+                roles = self.roles_by_item(item_name)
+                if roles:
+                    print(f"\nРоли для предмета '{item_name}':")
+                    for role in roles:
+                        print(role.name)
+                else:
+                    print("Роли для этого предмета не найдены.")
+
+            elif choice == "6":
+                print("Выход из программы.")
+                break
+
+            else:
+                print("Неверный выбор, попробуйте снова.")
+
+
+# Пример создания объектов
 carry = Role("Carry")
 offlaner = Role("Offlaner")
 support = Role("Support")
 
-# Пример героев
 axe = HeroStrength("Axe", health=700, mana=300, gender="Male", role=offlaner)
 phantom_assassin = HeroAgility("Phantom Assassin", health=500, mana=200, gender="Female", role=carry)
 crystal_maiden = HeroIntelligence("Crystal Maiden", health=450, mana=600, gender="Female", role=support)
 warlock = HeroIntelligence("Warlock", health=500, mana=500, gender="Male", role=support)
 
-# Пример предметов
 belt_of_strength = Item("Belt of Strength")
 blade_of_alacrity = Item("Blade of Alacrity")
 mantle_of_intelligence = Item("Mantle of Intelligence")
@@ -124,6 +255,13 @@ parasma.add_recommended_role(support, carry)
 slippers_of_agility.add_recommended_role(carry)
 staff_of_wizardry.add_recommended_role(support)
 
+# Создание системы запросов
+query_system = QuerySystem(
+    heroes=[axe, phantom_assassin, crystal_maiden, warlock],
+    roles=[carry, offlaner, support],
+    items=[belt_of_strength, blade_of_alacrity, mantle_of_intelligence, ogre_axe, parasma, slippers_of_agility, staff_of_wizardry]
+)
+
 # Вывод данных
 print("\nRoles and Required/Recommended Items:")
 for role in [carry, offlaner, support]:
@@ -139,3 +277,8 @@ for hero in [axe, phantom_assassin, crystal_maiden, warlock]:
     print(f"  Health={hero.health}, Mana={hero.mana}, Gender={hero.gender}, Role={hero.role.name}")
     print(f"  Items: {[item for item in hero.items]}")
     print(f"  Synergies: {[synergy.name for synergy in hero.synergies]}\n")
+
+# Запуск интерфейса
+user_interface = UserInterface(query_system)
+user_interface.user_interface()
+
