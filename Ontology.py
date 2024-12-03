@@ -1,3 +1,4 @@
+""""""
 class Hero:
     def __init__(self, name, health, mana, gender, role):
         self.name = name
@@ -136,40 +137,7 @@ class UserInterface:
 
             choice = input("Введите номер вашего выбора: ")
 
-            if choice == "1":
-                print("\nДоступные роли: ", ", ".join(self.list_available_roles()))
-                role_name = input("Введите роль: ")
-                heroes = self.heroes_by_role(role_name)
-                if heroes:
-                    print(f"\nГерои с ролью '{role_name}':")
-                    for hero in heroes:
-                        print(hero.name)
-                else:
-                    print("Герои с такой ролью не найдены.")
-
-            elif choice == "2":
-                print("\nДоступные предметы: ", ", ".join(self.list_available_items()))
-                item_name = input("Введите название предмета: ")
-                heroes = self.heroes_by_item(item_name)
-                if heroes:
-                    print(f"\nГерои с предметом '{item_name}':")
-                    for hero in heroes:
-                        print(hero.name)
-                else:
-                    print("Герои с таким предметом не найдены.")
-
-            elif choice == "3":
-                print("\nДоступные герои: ", ", ".join(self.list_available_heroes()))
-                synergy_name = input("Введите имя синергии: ")
-                heroes = self.heroes_by_synergy(synergy_name)
-                if heroes:
-                    print(f"\nГерои с синергией '{synergy_name}':")
-                    for hero in heroes:
-                        print(hero.name)
-                else:
-                    print("Герои с такой синергией не найдены.")
-
-            elif choice == "4":
+            if choice == "4":
                 print("\nДоступные роли: ", ", ".join(self.list_available_roles()))
                 role_name = input("Введите роль: ")
                 items = self.items_by_role(role_name)
@@ -177,19 +145,24 @@ class UserInterface:
                     print(f"\nПредметы для роли '{role_name}':")
                     for item in items:
                         print(item.name)
+
+                    # Выбор предмета для вывода связей
+                    item_name = input("\nВведите название предмета для отображения связей: ")
+                    selected_item = next((item for item in items if item.name.lower() == item_name.lower()), None)
+                    if selected_item:
+                        # Находим всех героев, связанных с этим предметом
+                        related_heroes = self.heroes_by_item(item_name)
+                        print(f"\nГерои, связанные с предметом '{item_name}':")
+                        for hero in related_heroes:
+                            print(f"\nГерой: {hero.name}")
+                            print(f"  Роль: {hero.role.name}")
+                            print(f"  Подкласс: {hero.__class__.__name__}")
+                            print(f"  Предметы: {[item.name for item in hero.items]}")
+                            print(f"  Синергии: {[synergy.name for synergy in hero.synergies]}")
+                    else:
+                        print("Такого предмета не найдено.")
                 else:
                     print("Предметы для этой роли не найдены.")
-
-            elif choice == "5":
-                print("\nДоступные предметы: ", ", ".join(self.list_available_items()))
-                item_name = input("Введите название предмета: ")
-                roles = self.roles_by_item(item_name)
-                if roles:
-                    print(f"\nРоли для предмета '{item_name}':")
-                    for role in roles:
-                        print(role.name)
-                else:
-                    print("Роли для этого предмета не найдены.")
 
             elif choice == "6":
                 print("Выход из программы.")

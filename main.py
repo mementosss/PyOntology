@@ -10,7 +10,6 @@ time_matrix = [
     [10, 15, 17, 19, 0]
 ]
 
-
 # Функция для вычисления длины маршрута
 def calculate_route_length(route, matrix):
     length = 0
@@ -18,12 +17,15 @@ def calculate_route_length(route, matrix):
         length += matrix[route[i] - 1][route[i + 1] - 1]
     return length
 
-
 # Алгоритм отжига
 def simulated_annealing(matrix, initial_route, initial_temp, alpha, iterations):
     current_route = initial_route
     current_temp = initial_temp
     current_length = calculate_route_length(current_route, matrix)
+
+    # Переменные для сохранения лучшего маршрута
+    best_route = current_route[:]
+    best_length = current_length
 
     print(f"Начальный маршрут: {current_route}, Длина: {current_length}, Температура: {current_temp}")
 
@@ -48,6 +50,12 @@ def simulated_annealing(matrix, initial_route, initial_temp, alpha, iterations):
             decision = "Принят"
             current_route = new_route
             current_length = new_length
+
+            # Проверяем, является ли новый маршрут лучшим
+            if current_length < best_length:
+                best_route = current_route[:]
+                best_length = current_length
+                print(f"  >>> Новый лучший маршрут записан! Best Route: {best_route}, Best Length: {best_length}")
         else:
             decision = "Отклонен"
 
@@ -59,20 +67,21 @@ def simulated_annealing(matrix, initial_route, initial_temp, alpha, iterations):
         print(f"  Вероятность принятия: {probability:.4f}")
         print(f"  Решение: {decision}")
         print(f"  Температура: {current_temp}")
+        print(f"  Текущий лучший маршрут: {best_route}, Лучшая длина: {best_length}\n")
 
         # Снижение температуры
         current_temp *= alpha
 
-    return current_route, current_length
-
+    # Возвращаем лучший маршрут и его длину
+    return best_route, best_length
 
 # Исходные данные
-initial_route = [1, 3, 2, 4, 5, 1]
-initial_temp = 100
-alpha = 0.5
-iterations = 10
+initial_route = [1, 3, 2, 4, 5, 1]  # Начальный маршрут
+initial_temp = 100  # Начальная температура
+alpha = 0.5  # Коэффициент уменьшения температуры
+iterations = 10  # Количество итераций
 
 # Выполнение
 final_route, final_length = simulated_annealing(time_matrix, initial_route, initial_temp, alpha, iterations)
-print("\nОптимальный маршрут:", final_route)
+print("\nСамый короткий маршрут:", final_route)
 print("Длина маршрута:", final_length)

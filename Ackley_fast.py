@@ -60,8 +60,8 @@ def simulated_annealing(func, s0, k_max=1000, T0=100, step_size=0.1):
 
 
 # Начальные условия
-s0 = [random.uniform(-5, 5), random.uniform(-5, 5)]  # Случайная начальная точка в диапазоне [-5, 5]
-k_max = 10000  # Увеличим количество итераций для лучшего результата
+s0 = [random.uniform(-5, 5), random.uniform(-5, 5)]
+k_max = 10000
 T0 = 100  # Начальная температура
 step_size = 0.5  # Размер шага
 
