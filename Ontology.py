@@ -1,178 +1,99 @@
-""""""
-class Hero:
-    def __init__(self, name, health, mana, gender, role):
+from abc import ABC, abstractmethod
+
+# Абстрактный базовый класс для всех сущностей
+class Entity(ABC):
+    def __init__(self, name):
         self.name = name
+        self.references = {}
+
+    def add_references(self, **kwargs):
+        for key, value in kwargs.items():
+            self.references[key] = value
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name={self.name})"
+
+
+# Классы для героев
+class Hero(Entity):
+    def __init__(self, name, health, mana, gender, role):
+        super().__init__(name)
         self.health = health
         self.mana = mana
         self.gender = gender
         self.role = role
-        self.items = []
-        self.synergies = []
-
-    def add_item(self, item):
-        self.items.append(item)
-
-    def add_synergy(self, *heroes):
-        self.synergies.extend(heroes)
-
-    def __repr__(self):
-        return f"Hero(name={self.name}, role={self.role.name})"
 
 
 class HeroStrength(Hero):
-    def __init__(self, name, health, mana, gender, role):
-        super().__init__(name, health, mana, gender, role)
+    pass
 
 
 class HeroAgility(Hero):
-    def __init__(self, name, health, mana, gender, role):
-        super().__init__(name, health, mana, gender, role)
+    pass
 
 
 class HeroIntelligence(Hero):
-    def __init__(self, name, health, mana, gender, role):
-        super().__init__(name, health, mana, gender, role)
+    pass
 
 
 # Класс для ролей
-class Role:
-    def __init__(self, name):
-        self.name = name
-        self.required_items = []  # Обязательные предметы для этой роли
-        self.recommended_items = []  # Рекомендуемые предметы для этой роли
-
-    def add_required_item(self, *items):
-        """Добавляет обязательные предметы для этой роли"""
-        self.required_items.extend(items)
-
-    def add_recommended_item(self, *items):
-        """Добавляет рекомендуемые предметы для этой роли"""
-        self.recommended_items.extend(items)
-
-    def __repr__(self):
-        return f"Role(name={self.name})"
+class Role(Entity):
+    def __init__(self, name, required_item=None):
+        super().__init__(name)
+        self.required_item = required_item
 
 
 # Класс для предметов
-class Item:
-    def __init__(self, name):
-        self.name = name
-        self.recommended_roles = []  # Список ролей, для которых предмет рекомендован
-
-    def add_recommended_role(self, *roles):
-        """Добавляет роли, для которых данный предмет рекомендован"""
-        self.recommended_roles.extend(roles)
-
-    def __repr__(self):
-        return f"Item(name={self.name})"
+class Item(Entity):
+    def __init__(self, name, recommended_role=None, recommended_hero=None):
+        super().__init__(name)
+        self.recommended_role = recommended_role
+        self.recommended_hero = recommended_hero
 
 
-# Запросы
-class QuerySystem:
-    def __init__(self, heroes, roles, items):
-        self.heroes = heroes
-        self.roles = roles
-        self.items = items
+# Функция для выполнения запросов
+def query(entities, cls, slot, flag, value):
+    filtered_entities = [entity for entity in entities if isinstance(entity, cls)]
 
-    def heroes_by_role(self, role_name):
-        """Поиск героев по роли"""
-        return [hero for hero in self.heroes if hero.role.name.lower() == role_name.lower()]
+    if hasattr(filtered_entities[0], slot):
+        return [entity for entity in filtered_entities if getattr(entity, slot) == value]
 
-    def heroes_by_item(self, item_name):
-        """Поиск героев по предмету"""
-        return [hero for hero in self.heroes if any(item.name.lower() == item_name.lower() for item in hero.items)]
+    search_result = []
+    for entity in filtered_entities:
+        names = [ref.name for ref in entity.references.get(slot, [])]
+        if value in names:
+            search_result.append(entity)
 
-    def heroes_by_synergy(self, synergy_name):
-        """Поиск героев по синергии"""
-        return [hero for hero in self.heroes if any(synergy.name.lower() == synergy_name.lower() for synergy in hero.synergies)]
-
-    def items_by_role(self, role_name):
-        """Поиск предметов по роли"""
-        return [item for item in self.items if any(role.name.lower() == role_name.lower() for role in item.recommended_roles)]
-
-    def roles_by_item(self, item_name):
-        """Поиск ролей по предмету"""
-        return [role for role in self.roles if any(item.name.lower() == item_name.lower() for item in role.required_items + role.recommended_items)]
+    return search_result if flag else [entity for entity in filtered_entities if entity not in search_result]
 
 
-# Запросы с выбором доступных опций
-class UserInterface:
-    def __init__(self, query_system):
-        self.query_system = query_system
+# Вспомогательные функции для вывода
 
-    def list_available_heroes(self):
-        return [hero.name for hero in self.query_system.heroes]
-
-    def list_available_roles(self):
-        return [role.name for role in self.query_system.roles]
-
-    def list_available_items(self):
-        return [item.name for item in self.query_system.items]
-
-    def heroes_by_role(self, role_name):
-        return self.query_system.heroes_by_role(role_name)
-
-    def heroes_by_item(self, item_name):
-        return self.query_system.heroes_by_item(item_name)
-
-    def heroes_by_synergy(self, synergy_name):
-        return self.query_system.heroes_by_synergy(synergy_name)
-
-    def items_by_role(self, role_name):
-        return self.query_system.items_by_role(role_name)
-
-    def roles_by_item(self, item_name):
-        return self.query_system.roles_by_item(item_name)
-
-    def user_interface(self):
-        print("Добро пожаловать в систему запросов!\n")
-        while True:
-            print("\nЧто вы хотите найти?")
-            print("1. Герои по роли")
-            print("2. Герои по предмету")
-            print("3. Герои по синергии")
-            print("4. Предметы по роли")
-            print("5. Роли по предмету")
-            print("6. Выход")
-
-            choice = input("Введите номер вашего выбора: ")
-
-            if choice == "4":
-                print("\nДоступные роли: ", ", ".join(self.list_available_roles()))
-                role_name = input("Введите роль: ")
-                items = self.items_by_role(role_name)
-                if items:
-                    print(f"\nПредметы для роли '{role_name}':")
-                    for item in items:
-                        print(item.name)
-
-                    # Выбор предмета для вывода связей
-                    item_name = input("\nВведите название предмета для отображения связей: ")
-                    selected_item = next((item for item in items if item.name.lower() == item_name.lower()), None)
-                    if selected_item:
-                        # Находим всех героев, связанных с этим предметом
-                        related_heroes = self.heroes_by_item(item_name)
-                        print(f"\nГерои, связанные с предметом '{item_name}':")
-                        for hero in related_heroes:
-                            print(f"\nГерой: {hero.name}")
-                            print(f"  Роль: {hero.role.name}")
-                            print(f"  Подкласс: {hero.__class__.__name__}")
-                            print(f"  Предметы: {[item.name for item in hero.items]}")
-                            print(f"  Синергии: {[synergy.name for synergy in hero.synergies]}")
-                    else:
-                        print("Такого предмета не найдено.")
-                else:
-                    print("Предметы для этой роли не найдены.")
-
-            elif choice == "6":
-                print("Выход из программы.")
-                break
-
-            else:
-                print("Неверный выбор, попробуйте снова.")
+def obj_output(obj):
+    if isinstance(obj, list):
+        return [(x.name, x.__class__.__name__) for x in obj]
+    else:
+        return obj.name, obj.__class__.__name__
 
 
-# Пример создания объектов
+def references_output(obj):
+    output = f"{obj.name} references:\n"
+    for slot, references in obj.references.items():
+        if isinstance(references, list):
+            names = [obj_output(ref) for ref in references]
+            output += f"{slot.upper()}: {names}\n"
+        else:
+            output += f"{slot.upper()}: {obj_output(references)}\n"
+    return output
+
+
+def get_reference(obj, slot, index=0):
+    if isinstance(obj.references[slot], list):
+        return obj.references[slot][index]
+    return obj.references[slot]
+
+
+# Создание объектов
 carry = Role("Carry")
 offlaner = Role("Offlaner")
 support = Role("Support")
@@ -182,76 +103,69 @@ phantom_assassin = HeroAgility("Phantom Assassin", health=500, mana=200, gender=
 crystal_maiden = HeroIntelligence("Crystal Maiden", health=450, mana=600, gender="Female", role=support)
 warlock = HeroIntelligence("Warlock", health=500, mana=500, gender="Male", role=support)
 
-belt_of_strength = Item("Belt of Strength")
-blade_of_alacrity = Item("Blade of Alacrity")
-mantle_of_intelligence = Item("Mantle of Intelligence")
-ogre_axe = Item("Ogre Axe")
-parasma = Item("Parasma")
-slippers_of_agility = Item("Slippers of Agility")
-staff_of_wizardry = Item("Staff of Wizardry")
+belt_of_strength = Item("Belt of Strength", recommended_role=offlaner)
+blade_of_alacrity = Item("Blade of Alacrity", recommended_role=carry)
+mantle_of_intelligence = Item("Mantle of Intelligence", recommended_role=support)
+ogre_axe = Item("Ogre Axe", recommended_role=offlaner)
+parasma = Item("Parasma", recommended_role=[support, carry])
+slippers_of_agility = Item("Slippers of Agility", recommended_role=carry)
+staff_of_wizardry = Item("Staff of Wizardry", recommended_role=support)
 
-# Привязка предметов к героям
-axe.add_item(belt_of_strength)
-axe.add_item(ogre_axe)
-phantom_assassin.add_item(blade_of_alacrity)
-phantom_assassin.add_item(slippers_of_agility)
-phantom_assassin.add_item(parasma)
-crystal_maiden.add_item(parasma)
-crystal_maiden.add_item(mantle_of_intelligence)
-crystal_maiden.add_item(staff_of_wizardry)
-warlock.add_item(parasma)
-warlock.add_item(mantle_of_intelligence)
-warlock.add_item(staff_of_wizardry)
+# Добавление связей
+axe.add_references(items=[belt_of_strength, ogre_axe], synergies=[crystal_maiden], plays_role=offlaner)
+phantom_assassin.add_references(items=[blade_of_alacrity, slippers_of_agility, parasma], synergies=[crystal_maiden, warlock], plays_role=carry)
+crystal_maiden.add_references(items=[parasma, mantle_of_intelligence, staff_of_wizardry], synergies=[phantom_assassin, axe], plays_role=support)
+warlock.add_references(items=[parasma, mantle_of_intelligence, staff_of_wizardry], synergies=[phantom_assassin], plays_role=support)
 
-# Синергии
-axe.add_synergy(crystal_maiden)
-phantom_assassin.add_synergy(crystal_maiden, warlock)
-crystal_maiden.add_synergy(phantom_assassin, axe)
-warlock.add_synergy(phantom_assassin)
+carry.add_references(required_items=[parasma, slippers_of_agility], recommended_items=[blade_of_alacrity])
+offlaner.add_references(required_items=[ogre_axe], recommended_items=[belt_of_strength])
+support.add_references(required_items=[staff_of_wizardry], recommended_items=[mantle_of_intelligence])
 
-# Добавляем обязательные предметы для ролей
-carry.add_required_item(parasma, slippers_of_agility)
-offlaner.add_required_item(ogre_axe)
-support.add_required_item(staff_of_wizardry)
+belt_of_strength.add_references(recommended_roles=offlaner)
+blade_of_alacrity.add_references(recommended_roles=carry)
+mantle_of_intelligence.add_references(recommended_roles=support)
+ogre_axe.add_references(recommended_roles=offlaner)
+parasma.add_references(recommended_roles=[support, carry])
+slippers_of_agility.add_references(recommended_roles=carry)
+staff_of_wizardry.add_references(recommended_roles=support)
 
-# Добавляем рекомендованные предметы для ролей
-carry.add_recommended_item(blade_of_alacrity)
-offlaner.add_recommended_item(belt_of_strength)
-support.add_recommended_item(mantle_of_intelligence)
+# Список всех объектов
+instances = [
+    carry, offlaner, support,
+    axe, phantom_assassin, crystal_maiden, warlock,
+    belt_of_strength, blade_of_alacrity, mantle_of_intelligence, ogre_axe, parasma, slippers_of_agility, staff_of_wizardry
+]
 
-# Добавляем рекомендованные роли для предметов
-belt_of_strength.add_recommended_role(offlaner)
-blade_of_alacrity.add_recommended_role(carry)
-mantle_of_intelligence.add_recommended_role(support)
-ogre_axe.add_recommended_role(offlaner)
-parasma.add_recommended_role(support, carry)
-slippers_of_agility.add_recommended_role(carry)
-staff_of_wizardry.add_recommended_role(support)
+# Пример вывода связей один-к-одному
+print("\n--- Один к одному ---")
+print(references_output(belt_of_strength))
+print(references_output(blade_of_alacrity))
 
-# Создание системы запросов
-query_system = QuerySystem(
-    heroes=[axe, phantom_assassin, crystal_maiden, warlock],
-    roles=[carry, offlaner, support],
-    items=[belt_of_strength, blade_of_alacrity, mantle_of_intelligence, ogre_axe, parasma, slippers_of_agility, staff_of_wizardry]
-)
+# Пример вывода связей один-ко-многим
+print("\n--- Один ко многим ---")
+print(references_output(parasma))
+print(references_output(phantom_assassin))
 
-# Вывод данных
-print("\nRoles and Required/Recommended Items:")
-for role in [carry, offlaner, support]:
-    print(f"{role.name} (Required Items: {[item.name for item in role.required_items]}, Recommended Items: {[item.name for item in role.recommended_items]})")
+# Пример вывода с ролями и обязательными предметами
+print("\n--- Роли и обязательные предметы ---")
+print(f"{carry.name}: обязательный предмет: {carry.references.get('required_items')}")
+print(f"{offlaner.name}: обязательный предмет: {offlaner.references.get('required_items')}")
+print(f"{support.name}: обязательный предмет: {support.references.get('required_items')}")
 
-print("\nItems and Recommended Roles:")
-for item in [belt_of_strength, blade_of_alacrity, mantle_of_intelligence, ogre_axe, parasma, slippers_of_agility, staff_of_wizardry]:
-    print(f"{item.name} (Recommended Roles: {[role.name for role in item.recommended_roles]})")
+# Пример запроса
+query_heroes = query(instances, Role, 'required_items', True, 'Parasma')
+print("\n--- Запрос ролей с required_items 'Parasma' ---")
+print(obj_output(query_heroes))
+print(references_output(query_heroes[0]))
 
-print("\nHero Details:")
-for hero in [axe, phantom_assassin, crystal_maiden, warlock]:
-    print(f"{hero.name} -> Subclass: [{hero.__class__.__name__}]")
-    print(f"  Health={hero.health}, Mana={hero.mana}, Gender={hero.gender}, Role={hero.role.name}")
-    print(f"  Items: {[item for item in hero.items]}")
-    print(f"  Synergies: {[synergy.name for synergy in hero.synergies]}\n")
+ref_items = get_reference(query_heroes[0], 'recommended_items')
+print("\n--- Рекомендуемый предмет ---")
+print(obj_output(ref_items))
+print(references_output(ref_items))
 
-# Запуск интерфейса
-user_interface = UserInterface(query_system)
-user_interface.user_interface()
-
+# Пример вывода ссылок на роли для героев
+print("\n--- Герои и их роли ---")
+print(references_output(axe))
+print(references_output(phantom_assassin))
+print(references_output(crystal_maiden))
+print(references_output(warlock))
