@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 
 
-# -------------------------
-# Abstract класс Герой
-# -------------------------
 class Hero(ABC):
     @abstractmethod
     def __init__(self, name, health, role, real_name, mana, gender):
@@ -225,9 +222,6 @@ instances = [
     role_carry, role_offlaner, role_support
 ]
 
-# -------------------------
-# Запросы
-# -------------------------
 # ----------------- Функции для запросов -----------------
 
 def query_1():
@@ -249,12 +243,20 @@ def query_2():
     print(references_output(role_support))
     print(references_output(staff_of_wizardry))
 
+def query_3():
+    print("=== Запрос 3: Предметы рекомендованные Axe и связанные объекты ===")
+    axe_items = query(instances, Item, "recommended_for", True, "Axe")
+    print('Search Results: ')
+    print(obj_output(axe_items))
+    print('')
+    print(references_output(ogre_axe))
+    print(references_output(axe))
 
-# ----------------- Главный интерфейс -----------------
 while True:
     print("\nВыберите номер запроса:")
     print("1 - Запрос 1")
     print("2 - Запрос 2")
+    print("3 - Запрос 3")
     print("0 - Выход")
     choice = input("Введите номер запроса: ").strip()
 
@@ -262,6 +264,8 @@ while True:
         query_1()
     elif choice == "2":
         query_2()
+    elif choice == "3":
+        query_3()
     elif choice == "0":
         print("Выход...")
         break

@@ -2,14 +2,10 @@ import numpy as np
 
 # Функция Экли
 def ackley_function(x, y):
-    return (
-        -20 * np.exp(-0.2 * np.sqrt(0.5 * (x**2 + y**2)))
-        - np.exp(0.5 * (np.cos(2 * np.pi * x) + np.cos(2 * np.pi * y)))
-        + np.e + 20
-    )
+    return (x**2 + y - 11)**2 + (x + y**2 - 7)**2
 
 # Параметры
-num_particles = 30  # Количество частиц
+num_particles = 10  # Количество частиц
 num_iterations = 50  # Количество итераций
 w = 0.2  # Коэффициент инерции
 c1 = 2.0  # Коэффициент обучения для личного лучшего

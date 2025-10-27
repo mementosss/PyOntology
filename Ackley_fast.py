@@ -4,12 +4,8 @@ import random
 
 
 # Функция Экли
-def ackley_function(x, y):
-    return (
-            -20 * np.exp(-0.2 * np.sqrt(0.5 * (x ** 2 + y ** 2)))
-            - np.exp(0.5 * (np.cos(2 * np.pi * x) + np.cos(2 * np.pi * y)))
-            + np.e + 20
-    )
+def himmelblau_function(x, y):
+    return (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
 
 
 # Функция температуры (быстрое снижение)
@@ -65,7 +61,7 @@ k_max = 10000
 T0 = 100  # Начальная температура
 step_size = 0.5  # Размер шага
 
-result, value, last_temperature = simulated_annealing(ackley_function, s0, k_max=k_max, T0=T0, step_size=step_size)
+result, value, last_temperature = simulated_annealing(himmelblau_function, s0, k_max=k_max, T0=T0, step_size=step_size)
 
 print("\nОптимальная точка (x, y) = ", result)
 print("Значение функции в оптимальной точке f(x, y) = ", value)
